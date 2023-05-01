@@ -5,13 +5,16 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
-
+from progress.bar import ShadyBar
 
 #Get csv file as input
 parser = argparse.ArgumentParser()
 parser.add_argument("--file", "-f", type=str, required=True)
 args = parser.parse_args()
 csv_file_path = args.file
+num_accounts = 0
+with open (csv_file_path, "r") as f:
+    num_accounts = len(f.readlines())
 
 # Define the DocSend website URL
 docsend_url = 'https://www.docsend.com/'
@@ -49,14 +52,17 @@ def create_docsend_link(account):
 
 
 def create_links():
+    bar = ShadyBar('Creating Links:', max = num_accounts)
     list_of_links = []
     with open(csv_file_path, newline='') as csvfile:
         list_reader = csv.reader(csvfile, delimiter=",")
         for row in list_reader:
             account = row[0]
             docsend_link = create_docsend_link(account)
-            print(docsend_link)
+            bar.next()
+
             list_of_links.append([account, docsend_link])
+    bar.finish()
     return list_of_links
 
 def write_output():
